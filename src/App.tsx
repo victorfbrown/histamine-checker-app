@@ -1,14 +1,34 @@
-import { useState } from 'react'
+import { useState, type KeyboardEvent } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import { neon } from '@neondatabase/serverless';
 const DB_URL: string = import.meta.env.VITE_NETLIFY_DATABASE_URL
+const CORRECT_PASSWORD : string = import.meta.env.VITE_CORRECT_PASSWORD
 const sql = neon(DB_URL);
 const [post] = await sql`SELECT * FROM playing_with_neon`;
 
 function App() {
   const [count, setCount] = useState(0)
+  const [inputValue, setInputValue] = useState('')
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newInputValue = event.target.value;
+    setInputValue(newInputValue)
+  }
+
+  const handleEnter = (event: KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      validateInput()
+    }
+  }
+
+  const validateInput = () => {
+    const isCorrectPassword = inputValue === CORRECT_PASSWORD
+    if (isCorrectPassword) {
+      alert(`hi ${CORRECT_PASSWORD}!`)
+    }
+  }
 
   return (
     <>
@@ -28,6 +48,12 @@ function App() {
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>
+      </div>
+      <div className="card">
+        <input type="text" onChange={handleChange} onKeyDown={handleEnter} />
+      </div>
+      <div>
+        <button onClick={validateInput}>Click me</button>
       </div>
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
