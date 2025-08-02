@@ -2,6 +2,10 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import { neon } from '@neondatabase/serverless';
+const DB_URL: string = import.meta.env.VITE_NETLIFY_DATABASE_URL
+const sql = neon(DB_URL);
+const [post] = await sql`SELECT * FROM playing_with_neon`;
 
 function App() {
   const [count, setCount] = useState(0)
