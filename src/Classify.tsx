@@ -1,6 +1,6 @@
+import './App.css'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
-import './App.css'
 // import { neon } from '@neondatabase/serverless';
 // const DB_URL: string = import.meta.env.VITE_NETLIFY_DATABASE_URL
 // const CORRECT_PASSWORD : string = import.meta.env.VITE_CORRECT_PASSWORD

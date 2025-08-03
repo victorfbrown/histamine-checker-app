@@ -1,9 +1,9 @@
-import './App.css'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import './App.css';
+import Classify from './Classify';
+import Home from './Home';
 import { AuthProvider } from './utils/AuthProvider';
 import ProtectedRoutes from './utils/ProtectedRoutes';
-import Home from './Home';
-import Classify from './Classify';
 
 
 function App() {

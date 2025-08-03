@@ -1,6 +1,6 @@
-import { useState, type KeyboardEvent } from 'react'
-import './App.css'
+import { useState, type KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import './App.css';
 import { useAuth } from './hooks/useAuth';
 const CORRECT_PASSWORD: string = import.meta.env.VITE_CORRECT_PASSWORD
 
