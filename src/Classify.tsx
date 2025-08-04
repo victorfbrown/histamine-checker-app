@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react'
 import './App.css'
-// import { neon } from '@neondatabase/serverless';
-// const DB_URL: string = import.meta.env.VITE_NETLIFY_DATABASE_URL
-// const CORRECT_PASSWORD : string = import.meta.env.VITE_CORRECT_PASSWORD
-// const sql = neon(DB_URL);
-// const [post] = await sql`SELECT * FROM playing_with_neon`;
+import { neon } from '@neondatabase/serverless';
+const DB_URL: string = import.meta.env.VITE_NETLIFY_DATABASE_URL
+const DB_NAME: string = 'histamine_checker'
+const sql = neon(DB_URL);
+import { ingredients } from './utils/ingredients';
+const first50 = ingredients.map((val) => `('${val}')`).slice(0,4).join(',')
+// const [testIngredients] = await sql`INSERT INTO ${DB_NAME} (ingredient) VALUES ${first50}`
+console.log(`INSERT INTO ${DB_NAME} (ingredient) VALUES ${first50};`)
 
 
-function classifyIngredient(event: KeyboardEvent) {
+async function classifyIngredient(event: KeyboardEvent) {
     const key = event.key.toLowerCase()
     const rejectIngredient = ["arrowleft", "a"].includes(key)
     const acceptIngredient = ["arrowright", "d"].includes(key)
@@ -15,6 +18,8 @@ function classifyIngredient(event: KeyboardEvent) {
         console.log('rejecting - ', key)
     } else if (acceptIngredient) {
         console.log('accepting - ', key)
+        // const [maxNumber] = await sql`SELECT max(id) from histamine_checker`
+        // console.log(maxNumber)
     }
 }
 
