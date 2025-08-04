@@ -5,9 +5,14 @@ const DB_URL: string = import.meta.env.VITE_NETLIFY_DATABASE_URL
 const DB_NAME: string = 'histamine_checker'
 const sql = neon(DB_URL);
 import { ingredients } from './utils/ingredients';
-const first50 = ingredients.map((val) => `('${val}')`).slice(0,4).join(',')
-// const [testIngredients] = await sql`INSERT INTO ${DB_NAME} (ingredient) VALUES ${first50}`
-console.log(`INSERT INTO ${DB_NAME} (ingredient) VALUES ${first50};`)
+const first300 = ingredients.map((val) => `('${val}')`).slice(0,2)
+// console.log(first300)
+// for (let i = 0; i < first300.length; i++) {
+//     // const [testIngredients] = await sql.query(`INSERT INTO ${DB_NAME} (ingredient) VALUES ${first300[i]};`)
+//     console.log(`INSERT INTO ${DB_NAME} (ingredient) VALUES ${first300[i]};`)
+// }
+// const [testIngredients] = await sql.query(`INSERT INTO ${DB_NAME} (ingredient) VALUES ;`)
+// console.log(`INSERT INTO ${DB_NAME} (ingredient) VALUES ('saaaalt');`)
 
 
 async function classifyIngredient(event: KeyboardEvent) {
@@ -34,6 +39,13 @@ function Classify() {
             document.removeEventListener('keydown', classifyIngredient);
         };
     }, [isClassifying]);
+
+    // useEffect(() => {
+    //     for (let i = 0; i < first300.length; i++) {
+    //         const [testIngredients] = await sql.query(`INSERT INTO ${DB_NAME} (ingredient) VALUES ${first300[i]};`)
+    //         console.log(`INSERT INTO ${DB_NAME} (ingredient) VALUES ${first300[i]};`)
+    //     }
+    // }, [])
 
 
     return (
