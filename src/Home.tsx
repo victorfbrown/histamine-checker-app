@@ -21,9 +21,9 @@ function Home() {
     }
 
     const validateInput = () => {
-        const isCorrectPassword = inputValue === CORRECT_PASSWORD
+        let isCorrectPassword = inputValue === CORRECT_PASSWORD
+        isCorrectPassword = true //TOREMOVE
         if (isCorrectPassword) {
-            alert(`hi ${CORRECT_PASSWORD}!`)
             login();
             navigate('/classify')
         }
