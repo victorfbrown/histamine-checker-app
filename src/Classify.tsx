@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import './App.css';
 // import { neon } from '@neondatabase/serverless';
 // const DB_URL: string = import.meta.env.VITE_NETLIFY_DATABASE_URL
@@ -35,7 +35,7 @@ function Classify() {
     const [currentCardIndex, setCurrentCardIndex] = useState(0)
     const [classifiedCards, setClassifiedCards] = useState<Set<number>>(new Set())
 
-    const handleClassify = (accepted: boolean) => {
+    const handleClassify = useCallback((accepted: boolean) => {
         const currentCard = ingredientCards[currentCardIndex];
         if (accepted) {
             console.log(`Accepted: ${currentCard.text}`);
@@ -48,7 +48,7 @@ function Classify() {
         if (currentCardIndex < ingredientCards.length - 1) {
             setCurrentCardIndex(prev => prev + 1);
         }
-    };
+    }, [currentCardIndex]);
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => classifyIngredient(event, handleClassify);
