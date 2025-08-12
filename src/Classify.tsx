@@ -1,5 +1,6 @@
 import { neon } from '@neondatabase/serverless';
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './App.css';
 import { ingredients } from './utils/ingredients';
 const DB_URL: string = import.meta.env.VITE_NETLIFY_DATABASE_URL
@@ -27,7 +28,17 @@ const updateIngredientClassification = async (ingredientName: string, isEdible: 
     }
 };
 
-async function classifyIngredient(event: KeyboardEvent, handleClassify: (accepted: boolean) => void) {
+// Update ingredient with notes and "Depends" classification
+const updateIngredientWithNotes = async (ingredientName: string, notes: string) => {
+    try {
+        await sql`UPDATE histamine_checker SET edible = 'Depends', notes = ${notes} WHERE ingredient = ${ingredientName}`;
+        console.log(`Updated ingredient "${ingredientName}" to edible: Depends with notes: ${notes}`);
+    } catch (error) {
+        console.error('Error updating ingredient with notes:', error);
+    }
+};
+
+async function classifyIngredient(event: KeyboardEvent, handleClassify: (accepted: boolean) => void, handleSkip: () => void, handleAddNotes: () => void) {
     const key = event.key.toLowerCase()
     const rejectIngredient = ["arrowleft", "a"].includes(key)
     const acceptIngredient = ["arrowright", "d"].includes(key)
@@ -41,9 +52,11 @@ async function classifyIngredient(event: KeyboardEvent, handleClassify: (accepte
         console.log('accepting - ', key)
         handleClassify(true)
     } else if (escapeKey) {
-        console.log('escape/up arrow pressed - ', key)
+        console.log('escape pressed - skipping card')
+        handleSkip()
     } else if (upKey) {
-        console.log('up arrow pressed - ', key)
+        console.log('up arrow pressed - adding notes')
+        handleAddNotes()
     }
 }
 
@@ -53,6 +66,9 @@ function Classify() {
     const [classifiedCards, setClassifiedCards] = useState<Set<number>>(new Set())
     const [ingredientCards, setIngredientCards] = useState<Array<{ id: number, text: string, color: string }>>([])
     const [isLoading, setIsLoading] = useState(true)
+    const [showNotesInput, setShowNotesInput] = useState(false)
+    const [notesText, setNotesText] = useState('')
+    const navigate = useNavigate();
 
     // Fetch unclassified ingredients on component mount
     useEffect(() => {
@@ -104,14 +120,46 @@ function Classify() {
         }
     }, [currentCardIndex, ingredientCards]);
 
+    const handleSkip = useCallback(() => {
+        // Skip current card and move to next
+        if (currentCardIndex < ingredientCards.length - 1) {
+            setCurrentCardIndex(prev => prev + 1);
+        }
+    }, [currentCardIndex, ingredientCards.length]);
+
+    const handleAddNotes = useCallback(() => {
+        setShowNotesInput(true);
+    }, []);
+
+    const handleSubmitNotes = async () => {
+        if (ingredientCards.length === 0 || notesText.trim() === '') return;
+
+        const currentCard = ingredientCards[currentCardIndex];
+        await updateIngredientWithNotes(currentCard.text, notesText.trim());
+
+        // Move to next card
+        if (currentCardIndex < ingredientCards.length - 1) {
+            setCurrentCardIndex(prev => prev + 1);
+        }
+
+        // Reset notes input
+        setNotesText('');
+        setShowNotesInput(false);
+    };
+
+    const handleCancelNotes = () => {
+        setNotesText('');
+        setShowNotesInput(false);
+    };
+
     useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => classifyIngredient(event, handleClassify);
+        const handleKeyDown = (event: KeyboardEvent) => classifyIngredient(event, handleClassify, handleSkip, handleAddNotes);
 
         document.addEventListener('keydown', handleKeyDown);
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [handleClassify]);
+    }, [handleClassify, handleSkip, handleAddNotes]);
 
     if (isLoading) {
         return <div style={{ textAlign: 'center', margin: '50px' }}>Loading ingredients...</div>;
@@ -124,7 +172,7 @@ function Classify() {
     return (
         <>
             <h1>Classify Ingredients</h1>
-            <p>Use a/← to reject or d/→ to accept the current ingredient</p>
+            <p>Use A/← to reject, D/→ to accept, ESC to skip, ↑ to add notes</p>
 
             <div style={{
                 position: 'relative',
@@ -195,6 +243,90 @@ function Classify() {
                 })}
             </div>
 
+            {/* Notes Input Modal */}
+            {showNotesInput && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 1000
+                }}>
+                    <div style={{
+                        backgroundColor: 'white',
+                        padding: '30px',
+                        borderRadius: '15px',
+                        maxWidth: '500px',
+                        width: '90%',
+                        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)'
+                    }}>
+                        <h3 style={{ marginTop: 0, marginBottom: '20px' }}>
+                            Add Notes for: {ingredientCards[currentCardIndex]?.text}
+                        </h3>
+                        <p style={{ marginBottom: '20px', color: '#666' }}>
+                            This ingredient will be marked as "Depends" with your notes.
+                        </p>
+                        <textarea
+                            value={notesText}
+                            onChange={(e) => setNotesText(e.target.value)}
+                            placeholder="Enter your notes here..."
+                            autoFocus
+                            style={{
+                                width: '100%',
+                                minHeight: '120px',
+                                padding: '15px',
+                                border: '1px solid #ddd',
+                                borderRadius: '8px',
+                                fontSize: '16px',
+                                fontFamily: 'inherit',
+                                resize: 'vertical'
+                            }}
+                        />
+                        <div style={{
+                            display: 'flex',
+                            gap: '15px',
+                            justifyContent: 'flex-end',
+                            marginTop: '20px'
+                        }}>
+                            <button
+                                onClick={handleCancelNotes}
+                                style={{
+                                    padding: '10px 20px',
+                                    backgroundColor: '#6B7280',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '5px',
+                                    cursor: 'pointer',
+                                    fontSize: '16px'
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSubmitNotes}
+                                disabled={notesText.trim() === ''}
+                                style={{
+                                    padding: '10px 20px',
+                                    backgroundColor: notesText.trim() === '' ? '#9CA3AF' : '#8B5CF6',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '5px',
+                                    cursor: notesText.trim() === '' ? 'not-allowed' : 'pointer',
+                                    fontSize: '16px'
+                                }}
+                            >
+                                Submit Notes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div style={{ textAlign: 'center', margin: '20px 0' }}>
                 <button
                     onClick={() => handleClassify(true)}
@@ -226,6 +358,40 @@ function Classify() {
                     }}
                 >
                     Reject
+                </button>
+                <button
+                    onClick={handleSkip}
+                    style={{
+                        marginLeft: '15px',
+                        padding: '12px 24px',
+                        backgroundColor: '#6B7280',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                        fontWeight: 'bold'
+                    }}
+                >
+                    Skip
+                </button>
+            </div>
+
+            <div style={{ textAlign: 'center', margin: '20px 0' }}>
+                <button
+                    onClick={() => navigate('/classified')}
+                    style={{
+                        padding: '12px 24px',
+                        backgroundColor: '#8B5CF6',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                        fontWeight: 'bold'
+                    }}
+                >
+                    View Classified Ingredients
                 </button>
             </div>
 

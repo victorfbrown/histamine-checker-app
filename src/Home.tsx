@@ -30,11 +30,16 @@ function Home() {
 
     return (
         <>
-            <h1>Vite + React</h1>
+            <h1>maya's histamine checker!</h1>
             <div className="card">
             </div>
             <div className="card">
-                <input type="text" onChange={handleChange} onKeyDown={handleEnter} />
+                <input
+                    type="password"
+                    placeholder="password"
+                    onChange={handleChange}
+                    onKeyDown={handleEnter}
+                />
             </div>
             <div>
                 <button onClick={validateInput}>Click me</button>

@@ -1,5 +1,6 @@
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import './App.css';
+import ClassifiedIngredients from './ClassifiedIngredients';
 import Classify from './Classify';
 import Home from './Home';
 import { AuthProvider } from './utils/AuthProvider';
@@ -16,6 +17,11 @@ function App() {
           <Route path="/classify" element={
             <ProtectedRoutes>
               <Classify />
+            </ProtectedRoutes>
+          } />
+          <Route path="/classified" element={
+            <ProtectedRoutes>
+              <ClassifiedIngredients />
             </ProtectedRoutes>
           } />
         </Routes>
