@@ -1,19 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
-import { neon } from '@neondatabase/serverless';
-const DB_URL: string = import.meta.env.VITE_NETLIFY_DATABASE_URL
-const DB_NAME: string = 'histamine_checker'
-const sql = neon(DB_URL);
-import { ingredients } from './utils/ingredients';
-const first300 = ingredients.map((val) => `('${val}')`).slice(0,2)
+import SwipeCards from './components/swipe-card'
+// import { neon } from '@neondatabase/serverless';
+// const DB_URL: string = import.meta.env.VITE_NETLIFY_DATABASE_URL
+// const DB_NAME: string = 'histamine_checker'
+// const sql = neon(DB_URL);
+// import { ingredients } from './utils/ingredients';
+// const first300 = ingredients.map((val) => `('${val}')`).slice(0,400)
 // console.log(first300)
-// for (let i = 0; i < first300.length; i++) {
-//     // const [testIngredients] = await sql.query(`INSERT INTO ${DB_NAME} (ingredient) VALUES ${first300[i]};`)
-//     console.log(`INSERT INTO ${DB_NAME} (ingredient) VALUES ${first300[i]};`)
-// }
-// const [testIngredients] = await sql.query(`INSERT INTO ${DB_NAME} (ingredient) VALUES ;`)
-// console.log(`INSERT INTO ${DB_NAME} (ingredient) VALUES ('saaaalt');`)
-
 
 async function classifyIngredient(event: KeyboardEvent) {
     const key = event.key.toLowerCase()
@@ -51,6 +45,7 @@ function Classify() {
     return (
         <>
             <h1> {isClassifying ? "Ingredient" : "Placeholder"} </h1>
+            <SwipeCards cards={cards} />
             <br></br>
             <br></br>
             <br></br>
