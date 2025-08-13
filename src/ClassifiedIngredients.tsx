@@ -108,7 +108,7 @@ function ClassifiedIngredients() {
                     Back to Classify
                 </button>
             </div>
-            <p>View all ingredients that have been classified as edible or non-edible</p>
+            <p>View all ingredients that have been classified as edible or inedible</p>
 
             {/* Statistics */}
             <div style={{
@@ -134,7 +134,7 @@ function ClassifiedIngredients() {
                     borderRadius: '10px',
                     textAlign: 'center'
                 }}>
-                    <h3>Non-Edible (No)</h3>
+                    <h3>Inedible (No)</h3>
                     <p style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.noCount}</p>
                 </div>
                 <div style={{
@@ -164,7 +164,7 @@ function ClassifiedIngredients() {
                 >
                     <option value="all">All Classified</option>
                     <option value="yes">Edible (Yes)</option>
-                    <option value="no">Non-Edible (No)</option>
+                    <option value="no">Inedible (No)</option>
                 </select>
             </div>
 
