@@ -9,7 +9,7 @@ const sql = neon(DB_URL);
 // Fetch ingredients where edible column is null
 const fetchUnclassifiedIngredients = async () => {
     try {
-        const result = await sql`SELECT id, ingredient FROM histamine_checker WHERE edible IS NULL AND ingredient NOT NULL ORDER BY id LIMIT 300`;
+        const result = await sql`SELECT id, ingredient FROM histamine_checker WHERE edible IS NULL AND ingredient IS NOT NULL ORDER BY id LIMIT 300`;
         return result;
     } catch (error) {
         console.error('Error fetching ingredients:', error);
@@ -103,14 +103,17 @@ function Classify() {
         if (ingredientCards.length === 0) return;
 
         const currentCard = ingredientCards[currentCardIndex];
+        if (!currentCard) return;
+
+        // Use the actual database record data
         if (accepted) {
             console.log(`Accepted: ${currentCard.text}`);
             setClassifiedCards(prev => new Set([...prev, currentCard.id]));
-            // Update database - Yes for edible
+            // Update database using the actual ingredient name from the card
             await updateIngredientClassification(currentCard.text, true);
         } else {
             console.log(`Rejected: ${currentCard.text}`);
-            // Update database - No for edible
+            // Update database using the actual ingredient name from the card
             await updateIngredientClassification(currentCard.text, false);
         }
 
@@ -135,6 +138,9 @@ function Classify() {
         if (ingredientCards.length === 0 || notesText.trim() === '') return;
 
         const currentCard = ingredientCards[currentCardIndex];
+        if (!currentCard) return;
+
+        // Use the actual ingredient name from the card
         await updateIngredientWithNotes(currentCard.text, notesText.trim());
 
         // Move to next card
@@ -175,72 +181,54 @@ function Classify() {
             <p>Use A/← to reject, D/→ to accept, ESC to skip, ↑ to add notes</p>
 
             <div style={{
-                position: 'relative',
                 width: '600px',
-                height: '200px',
                 margin: '40px auto',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
+                textAlign: 'center'
             }}>
-                {/* Render cards in reverse order so first cards appear on top */}
-                {ingredientCards.slice(currentCardIndex, currentCardIndex + 3).reverse().map((card, stackIndex) => {
-                    const isTopCard = stackIndex === 0;
-                    const zIndex = 100 - stackIndex;
-                    const offset = stackIndex * 4;
-                    const scale = 1 - (stackIndex * 0.05);
-                    const opacity = 1 - (stackIndex * 0.3);
-
-                    return (
-                        <div
-                            key={card.id}
-                            style={{
-                                position: 'absolute',
-                                width: '560px',
-                                height: '180px',
-                                backgroundColor: card.color,
-                                borderRadius: '15px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                cursor: isTopCard ? 'pointer' : 'default',
-                                fontSize: '18px',
-                                fontWeight: 'bold',
-                                color: 'white',
-                                boxShadow: '0 8px 25px rgba(0, 0, 0, 0.3)',
-                                transform: `translate(${offset}px, ${offset}px) scale(${scale})`,
-                                opacity: opacity,
-                                zIndex: zIndex,
-                                transition: 'all 0.3s ease',
-                                border: classifiedCards.has(card.id)
-                                    ? '4px solid #10B981'
-                                    : 'none',
-                                userSelect: 'none',
-                                padding: '20px',
-                                textAlign: 'center'
-                            }}
-                        >
-                            <div style={{
-                                fontSize: '24px',
-                                marginBottom: '15px',
-                                lineHeight: '1.2',
-                                maxWidth: '520px',
-                                wordWrap: 'break-word'
-                            }}>
-                                {card.text}
-                            </div>
-                            <div style={{
-                                fontSize: '14px',
-                                textAlign: 'center',
-                                opacity: 0.9,
-                                padding: '0 20px'
-                            }}>
-                                Card {card.id + 1} of {ingredientCards.length}
-                            </div>
+                {/* Display current card in simple format */}
+                {ingredientCards[currentCardIndex] && (
+                    <div
+                        style={{
+                            width: '560px',
+                            height: '180px',
+                            backgroundColor: '#8B5CF6',
+                            borderRadius: '15px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            margin: '0 auto',
+                            fontSize: '18px',
+                            fontWeight: 'bold',
+                            color: 'white',
+                            boxShadow: '0 8px 25px rgba(0, 0, 0, 0.3)',
+                            border: classifiedCards.has(ingredientCards[currentCardIndex].id)
+                                ? '4px solid #10B981'
+                                : 'none',
+                            userSelect: 'none',
+                            padding: '20px',
+                            textAlign: 'center'
+                        }}
+                    >
+                        <div style={{
+                            fontSize: '24px',
+                            marginBottom: '15px',
+                            lineHeight: '1.2',
+                            maxWidth: '520px',
+                            wordWrap: 'break-word'
+                        }}>
+                            {ingredientCards[currentCardIndex].text}
                         </div>
-                    );
-                })}
+                        <div style={{
+                            fontSize: '14px',
+                            textAlign: 'center',
+                            opacity: 0.9,
+                            padding: '0 20px'
+                        }}>
+                            Card {currentCardIndex + 1} of {ingredientCards.length}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Notes Input Modal */}
