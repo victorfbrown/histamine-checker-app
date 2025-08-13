@@ -63,8 +63,7 @@ async function classifyIngredient(event: KeyboardEvent, handleClassify: (accepte
 function Classify() {
 
     const [currentCardIndex, setCurrentCardIndex] = useState(0)
-    const [classifiedCards, setClassifiedCards] = useState<Set<number>>(new Set())
-    const [ingredientCards, setIngredientCards] = useState<Array<{ id: number, text: string, color: string }>>([])
+    const [ingredientCards, setIngredientCards] = useState<Array<{ id: number, text: string, color: string, lastAction?: 'accepted' | 'rejected' }>>([])
     const [isLoading, setIsLoading] = useState(true)
     const [showNotesInput, setShowNotesInput] = useState(false)
     const [notesText, setNotesText] = useState('')
@@ -105,10 +104,16 @@ function Classify() {
         const currentCard = ingredientCards[currentCardIndex];
         if (!currentCard) return;
 
+        // Set the lastAction for visual feedback
+        setIngredientCards(prev => prev.map((card, index) =>
+            index === currentCardIndex
+                ? { ...card, lastAction: accepted ? 'accepted' : 'rejected' }
+                : card
+        ));
+
         // Use the actual database record data
         if (accepted) {
             console.log(`Accepted: ${currentCard.text}`);
-            setClassifiedCards(prev => new Set([...prev, currentCard.id]));
             // Update database using the actual ingredient name from the card
             await updateIngredientClassification(currentCard.text, true);
         } else {
@@ -117,10 +122,12 @@ function Classify() {
             await updateIngredientClassification(currentCard.text, false);
         }
 
-        // Move to next card
-        if (currentCardIndex < ingredientCards.length - 1) {
-            setCurrentCardIndex(prev => prev + 1);
-        }
+        // Wait 500ms for visual feedback, then move to next card
+        setTimeout(() => {
+            if (currentCardIndex < ingredientCards.length - 1) {
+                setCurrentCardIndex(prev => prev + 1);
+            }
+        }, 500);
     }, [currentCardIndex, ingredientCards]);
 
     const handleSkip = useCallback(() => {
@@ -191,7 +198,11 @@ function Classify() {
                         style={{
                             width: '560px',
                             height: '180px',
-                            backgroundColor: '#8B5CF6',
+                            backgroundColor: ingredientCards[currentCardIndex].lastAction === 'accepted'
+                                ? '#10B981'
+                                : ingredientCards[currentCardIndex].lastAction === 'rejected'
+                                    ? '#EF4444'
+                                    : '#8B5CF6',
                             borderRadius: '15px',
                             display: 'flex',
                             flexDirection: 'column',
@@ -202,12 +213,10 @@ function Classify() {
                             fontWeight: 'bold',
                             color: 'white',
                             boxShadow: '0 8px 25px rgba(0, 0, 0, 0.3)',
-                            border: classifiedCards.has(ingredientCards[currentCardIndex].id)
-                                ? '4px solid #10B981'
-                                : 'none',
                             userSelect: 'none',
                             padding: '20px',
-                            textAlign: 'center'
+                            textAlign: 'center',
+                            transition: 'background-color 0.3s ease'
                         }}
                     >
                         <div style={{
@@ -225,7 +234,6 @@ function Classify() {
                             opacity: 0.9,
                             padding: '0 20px'
                         }}>
-                            Card {currentCardIndex + 1} of {ingredientCards.length}
                         </div>
                     </div>
                 )}
