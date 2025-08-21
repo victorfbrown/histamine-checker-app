@@ -40,8 +40,8 @@ const updateIngredientWithNotes = async (ingredientName: string, notes: string) 
 
 async function classifyIngredient(event: KeyboardEvent, handleClassify: (accepted: boolean) => void, handleSkip: () => void, handleAddNotes: () => void) {
     const key = event.key.toLowerCase()
-    const rejectIngredient = ["arrowleft", "a"].includes(key)
-    const acceptIngredient = ["arrowright", "d"].includes(key)
+    const rejectIngredient = ["arrowleft"].includes(key)
+    const acceptIngredient = ["arrowright"].includes(key)
     const escapeKey = ["escape"].includes(key)
     const upKey = ["arrowup"].includes(key)
 
@@ -185,7 +185,7 @@ function Classify() {
     return (
         <>
             <h1>Classify Ingredients</h1>
-            <p>Use A/← to reject, D/→ to accept, ESC to skip, ↑ to add notes</p>
+            <p>Use ← to reject, → to accept, ESC to skip, ↑ to add notes</p>
 
             <div style={{
                 width: '600px',
